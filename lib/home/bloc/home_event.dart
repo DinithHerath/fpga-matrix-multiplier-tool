@@ -40,6 +40,12 @@ class CalculateEvent extends HomeEvent {}
 
 class ClearEvent extends HomeEvent {}
 
+class UpdateExecEvent extends HomeEvent {
+  final String exec;
+
+  UpdateExecEvent(this.exec);
+}
+
 class RestartEvent extends HomeEvent {}
 
 class SavedAllEvent extends HomeEvent {

@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 
 @immutable
 class HomeState {
+  final bool execEnd;
+  final String execStep;
   final Map<int, int> matFPGA;
   final Map<int, int> matComp;
   final int index;
@@ -16,6 +18,8 @@ class HomeState {
   final String error;
 
   HomeState({
+    @required this.execEnd,
+    @required this.execStep,
     @required this.matFPGA,
     @required this.matComp,
     @required this.index,
@@ -31,6 +35,8 @@ class HomeState {
   });
 
   static HomeState get initialState => HomeState(
+        execEnd: false,
+        execStep: '',
         matFPGA: null,
         matComp: null,
         index: 0,
@@ -46,6 +52,8 @@ class HomeState {
       );
 
   HomeState clone({
+    bool execEnd,
+    String execStep,
     Map<int, int> matFPGA,
     Map<int, int> matComp,
     int index,
@@ -60,6 +68,8 @@ class HomeState {
     String error,
   }) {
     return HomeState(
+      execEnd: execEnd ?? this.execEnd,
+      execStep: execStep ?? this.execStep,
       matFPGA: matFPGA ?? this.matFPGA,
       matComp: matComp ?? this.matComp,
       index: index ?? this.index,

@@ -52,6 +52,7 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
 
       case CalculateEvent:
         yield state.clone(index: 1);
+        add(UpdateExecEvent('\$ computer matrix calculation started.....'));
         print('${state.matA}\n${state.matB}');
         final orderedList = <int>[];
         orderedList.addAll([state.rowsA, 0]);
@@ -67,10 +68,15 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
         final out = orderedList.map((e) => e.toRadixString(16).padLeft(2, '0')).toList();
         print(out);
         yield state.clone(matComp: matMultipication(state));
+        add(UpdateExecEvent('\$ computer resultunt matrix generated.....'));
         // writeMem(out);
-        // execFPGA();
-        final fpgaOut = await readMem(state);
-        yield state.clone(matFPGA: fpgaOut);
+        add(UpdateExecEvent('\$ data memory file placed.....'));
+        add(UpdateExecEvent('\$ fpga execution started.....'));
+        execFPGA(state);
+        add(UpdateExecEvent('\$ fpga execution finished.....'));
+        add(UpdateExecEvent('\$ reading result file.....'));
+        // final fpgaOut = await readMem(state);
+        // yield state.clone(matFPGA: fpgaOut, execEnd: true);
         break;
 
       case ClearEvent:
@@ -79,12 +85,17 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
         break;
 
       case RestartEvent:
-        yield state.clone(matA: Map(), matB: Map(), isDimAdded: false, isSaved: false, index: 0);
+        yield state.clone(matA: Map(), matB: Map(), isDimAdded: false, isSaved: false, index: 0, execStep: '', execEnd: false);
         break;
 
       case SavedAllEvent:
         final save = (event as SavedAllEvent).saved;
         yield state.clone(isSaved: save);
+        break;
+
+      case UpdateExecEvent:
+        final exec = (event as UpdateExecEvent).exec;
+        yield state.clone(execStep: exec);
         break;
     }
   }
@@ -150,7 +161,7 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
     final read = await file.readAsLines();
     final trunc = read.sublist(3);
     for (var i = 0; i < state.rowsA * state.columnsB; i++) {
-      out[i] = int.parse(trunc[i*2]) + 256 * int.parse(trunc[i*2 + 1]);
+      out[i] = int.parse(trunc[i * 2]) + 256 * int.parse(trunc[i * 2 + 1]);
     }
     return out;
   }
@@ -160,11 +171,19 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
     final cd = directory.trim().split("Release\\fpga_matrix_multiplier.exe")[0];
     final start = 140;
     final end = start + (state.rowsA * state.columnsB) - 1;
-    var shell = Shell();
-    await shell.run('''
-        cd '${cd}simulation\modelsim'
+    var controller = ShellLinesController();
+    var shell = Shell(stdout: controller.sink, verbose: false);
+    controller.stream.listen((event) {
+      add(UpdateExecEvent('\$ $event'));
+    });
+    try {
+      await shell.run('''
+        # cd '${cd}simulation\modelsim'
         # VSIM exec function
         vsim -do "do FPGA_Project_run_msim_rtl_verilog.do; do {wave_files/waves.do}; radix -decimal; restart -force; run -all; mem display -addressradix d -dataradix decimal -wordsperline 10 /processor_tb/dut/data_mem1; mem save -outfile {output_files/res.txt} -dataradix decimal -noaddress -start $start -end $end /processor_tb/dut/data_mem1 -wordsperline 1"
 ''');
+    } on ShellException catch (_) {
+      // We might get a shell exception
+    }
   }
 }

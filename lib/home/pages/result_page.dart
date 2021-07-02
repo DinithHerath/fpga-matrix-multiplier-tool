@@ -72,6 +72,27 @@ class ResultPage extends StatelessWidget {
                     ],
                   ),
                 ),
+                SizedBox(height: 30),
+                if (!state.execEnd)
+                  Row(
+                    children: [
+                      CircularProgressIndicator(),
+                      SizedBox(width: 50),
+                      Expanded(
+                        child: Text(
+                          '${state.execStep}',
+                          style: GoogleFonts.montserrat(
+                            textStyle: TextStyle(
+                              fontSize: 20,
+                              color: Constants.kHomeCard.withAlpha(72),
+                              fontWeight: FontWeight.w400,
+                              fontStyle: FontStyle.italic,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  )
               ],
             ),
           ),
