@@ -12,8 +12,6 @@ class MatrixResWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // ignore: close_sinks
-    final homeBloc = BlocProvider.of<HomeBloc>(context);
     return BlocBuilder<HomeBloc, HomeState>(
       // buildWhen: (previous, current) => previous.matA != current.matA || previous.isDimAdded != current.isDimAdded,
       builder: (context, state) {
