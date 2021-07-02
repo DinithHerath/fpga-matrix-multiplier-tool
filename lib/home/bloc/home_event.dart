@@ -40,6 +40,12 @@ class CalculateEvent extends HomeEvent {}
 
 class ClearEvent extends HomeEvent {}
 
+class FinalOutputEvent extends HomeEvent {
+  final Map<int, int> out;
+
+  FinalOutputEvent(this.out);
+}
+
 class UpdateExecEvent extends HomeEvent {
   final String exec;
 

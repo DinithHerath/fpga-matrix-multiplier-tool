@@ -9,6 +9,7 @@ import 'home_event.dart';
 import 'home_state.dart';
 
 class HomeBloc extends Bloc<HomeEvent, HomeState> {
+  Timer timer;
   HomeBloc(BuildContext context) : super(HomeState.initialState);
 
   @override
@@ -51,7 +52,11 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
         break;
 
       case CalculateEvent:
-        yield state.clone(index: 1);
+        final empty = Map<int, int>();
+        for (var i = 0; i < state.rowsA * state.columnsB; i++) {
+          empty[i] = 0;
+        }
+        yield state.clone(index: 1, matComp: empty, matFPGA: empty);
         add(UpdateExecEvent('\$ computer matrix calculation started.....'));
         print('${state.matA}\n${state.matB}');
         final orderedList = <int>[];
@@ -69,19 +74,37 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
         print(out);
         yield state.clone(matComp: matMultipication(state));
         add(UpdateExecEvent('\$ computer resultunt matrix generated.....'));
-        // writeMem(out);
+        writeMem(out);
         add(UpdateExecEvent('\$ data memory file placed.....'));
         add(UpdateExecEvent('\$ fpga execution started.....'));
         execFPGA(state);
         add(UpdateExecEvent('\$ fpga execution finished.....'));
-        add(UpdateExecEvent('\$ reading result file.....'));
-        // final fpgaOut = await readMem(state);
-        // yield state.clone(matFPGA: fpgaOut, execEnd: true);
+        final output = Map<int, int>();
+        final directory = Platform.resolvedExecutable;
+        final cd = directory.trim().split("Release\\fpga_matrix_multiplier.exe")[0];
+        print(cd);
+        final File file = File('${cd}simulation\\modelsim\\output_files\\res.txt');
+        add(UpdateExecEvent('\$ reading result file..... ${cd}simulation\\modelsim\\output_files\\res.txt'));
+        timer = Timer.periodic(Duration(seconds: 2), (timer) {
+          final read = file.readAsLinesSync();
+          if (read.isNotEmpty && read.length == (3 + state.rowsA * state.columnsB * 2)) {
+            timer.cancel();
+            final trunc = read.sublist(3);
+            for (var i = 0; i < state.rowsA * state.columnsB; i++) {
+              output[i] = int.parse(trunc[i * 2]) + 256 * int.parse(trunc[i * 2 + 1]);
+            }
+            add(FinalOutputEvent(output));
+          }
+        });
+        break;
+
+      case FinalOutputEvent:
+        final data = (event as FinalOutputEvent).out;
+        yield state.clone(matFPGA: data, execEnd: true);
         break;
 
       case ClearEvent:
-        readMem(state);
-        // yield state.clone(matA: Map(), matB: Map(), isDimAdded: false, isSaved: false);
+        yield state.clone(matA: Map(), matB: Map(), isDimAdded: false, isSaved: false);
         break;
 
       case RestartEvent:
@@ -108,6 +131,7 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
 
   @override
   Future<void> close() async {
+    timer.cancel();
     await super.close();
   }
 
@@ -143,8 +167,8 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
     final directory = Platform.resolvedExecutable;
     final cd = directory.trim().split("Release\\fpga_matrix_multiplier.exe")[0];
     print(cd);
-    final File file = File('${cd}simulation\modelsim\initial_files\data_mem.txt');
-    final File fileOut = File('${cd}simulation\modelsim\output_files\res.txt');
+    final File file = File('${cd}simulation\\modelsim\\initial_files\\data_mem.txt');
+    final File fileOut = File('${cd}simulation\\modelsim\\output_files\\res.txt');
     await fileOut.writeAsString('');
     await file.writeAsString('');
     for (var mem in output) {
@@ -152,35 +176,42 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
     }
   }
 
-  Future<Map<int, int>> readMem(HomeState state) async {
-    final out = Map<int, int>();
-    final directory = Platform.resolvedExecutable;
-    final cd = directory.trim().split("fpga_matrix_multiplier.exe")[0];
-    print(cd);
-    final File file = File('${cd}res.txt');
-    final read = await file.readAsLines();
-    final trunc = read.sublist(3);
-    for (var i = 0; i < state.rowsA * state.columnsB; i++) {
-      out[i] = int.parse(trunc[i * 2]) + 256 * int.parse(trunc[i * 2 + 1]);
-    }
-    return out;
-  }
+  // Future<Map<int, int>> readMem(HomeState state) async {
+  //   final out = Map<int, int>();
+  //   final directory = Platform.resolvedExecutable;
+  //   final cd = directory.trim().split("fpga_matrix_multiplier.exe")[0];
+  //   print(cd);
+  //   final File file = File('${cd}res.txt');
+  //   timer = Timer.periodic(Duration(seconds: 2), (timer) {
+  //     final read = file.readAsLinesSync();
+  //     if (read.isNotEmpty && read.length == (3 + state.rowsA * state.columnsB * 2)) {
+  //       timer.cancel();
+  //       final trunc = read.sublist(3);
+  //       for (var i = 0; i < state.rowsA * state.columnsB; i++) {
+  //         out[i] = int.parse(trunc[i * 2]) + 256 * int.parse(trunc[i * 2 + 1]);
+  //       }
+  //     }
+  //     return out;
+  //   });
+  //   return out;
+  // }
 
   void execFPGA(HomeState state) async {
     final directory = Platform.resolvedExecutable;
     final cd = directory.trim().split("Release\\fpga_matrix_multiplier.exe")[0];
     final start = 140;
-    final end = start + (state.rowsA * state.columnsB) - 1;
+    final end = start + (state.rowsA * state.columnsB * 2) - 1;
     var controller = ShellLinesController();
-    var shell = Shell(stdout: controller.sink, verbose: false);
+    var shell = Shell(stdout: controller.sink, verbose: false, workingDirectory: '${cd}simulation\\modelsim');
     controller.stream.listen((event) {
       add(UpdateExecEvent('\$ $event'));
+      print(event);
     });
     try {
       await shell.run('''
-        # cd '${cd}simulation\modelsim'
         # VSIM exec function
-        vsim -do "do FPGA_Project_run_msim_rtl_verilog.do; do {wave_files/waves.do}; radix -decimal; restart -force; run -all; mem display -addressradix d -dataradix decimal -wordsperline 10 /processor_tb/dut/data_mem1; mem save -outfile {output_files/res.txt} -dataradix decimal -noaddress -start $start -end $end /processor_tb/dut/data_mem1 -wordsperline 1"
+        vsim -do "do FPGA_Project_run_msim_rtl_verilog.do; do {wave_files/waves.do}; radix -decimal; restart -force; run -all; mem display -addressradix d -dataradix decimal -wordsperline 10 /processor_tb/dut/data_mem1; mem save -outfile {output_files/res.txt} -dataradix unsigned -noaddress -start $start -end $end /processor_tb/dut/data_mem1 -wordsperline 1"
+        exit()
 ''');
     } on ShellException catch (_) {
       // We might get a shell exception
