@@ -1,4 +1,4 @@
-# fpga_matrix_multiplier
+# FPGA Matrix Multiplier Tool
 
 Support application for matrix multiplication using fpga
 
