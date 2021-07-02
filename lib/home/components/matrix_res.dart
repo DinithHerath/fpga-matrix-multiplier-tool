@@ -53,7 +53,7 @@ class MatrixResWidget extends StatelessWidget {
                           width: cWidth,
                           child: Center(
                             child: Text(
-                              state.matComp[i * cCount + j].toString(),
+                              isComp ? state.matComp[i * cCount + j].toString() : state.matFPGA[i * cCount + j].toString(),
                               style: GoogleFonts.montserrat(
                                 textStyle: TextStyle(
                                   fontSize: min(rHeight * 0.4, cWidth * 0.4),
