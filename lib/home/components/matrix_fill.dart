@@ -29,19 +29,52 @@ class _MatrixWidgetState extends State<MatrixFillWidget> {
     // ignore: close_sinks
     final homeBloc = BlocProvider.of<HomeBloc>(context);
     return BlocBuilder<HomeBloc, HomeState>(
-      buildWhen: (previous, current) => previous.isDimAdded != current.isDimAdded,
+      buildWhen: (previous, current) => previous.isDimAdded != current.isDimAdded || previous.randomA != current.randomA || previous.randomB != current.randomB,
       builder: (context, state) {
         return Column(
           children: [
-            Text(
-              widget.isA ? 'Matrix A' : 'Matrix B',
-              style: GoogleFonts.montserrat(
-                textStyle: TextStyle(
-                  fontSize: 50,
-                  color: Constants.kHomeCard,
-                  fontWeight: FontWeight.w600,
+            Row(
+              children: [
+                Text(
+                  widget.isA ? 'Matrix A' : 'Matrix B',
+                  style: GoogleFonts.montserrat(
+                    textStyle: TextStyle(
+                      fontSize: 50,
+                      color: Constants.kHomeCard,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
                 ),
-              ),
+                if (state.isDimAdded)
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                    child: TextButton(
+                      onPressed: () {
+                        widget.isA ? homeBloc.add(RandomizeMatrixAEvent()) : homeBloc.add(RandomizeMatrixBEvent());
+                      },
+                      style: ElevatedButton.styleFrom(
+                        padding: EdgeInsets.symmetric(vertical: 12, horizontal: 12),
+                        elevation: null,
+                        minimumSize: Size(240, 25),
+                        primary: Constants.kHomeCard,
+                        onPrimary: Colors.grey,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                      ),
+                      child: Text(
+                        'Randomize',
+                        style: GoogleFonts.montserrat(
+                          textStyle: TextStyle(
+                            fontSize: 30,
+                            color: Colors.white,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ),
+                    ),
+                  )
+              ],
             ),
             SizedBox(
               width: (MediaQuery.of(context).size.width - 62) / 2,
