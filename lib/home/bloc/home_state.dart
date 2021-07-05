@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 
 @immutable
 class HomeState {
+  final bool randomB;
+  final bool randomA;
   final bool execEnd;
   final String execStep;
   final Map<int, int> matFPGA;
@@ -18,6 +20,8 @@ class HomeState {
   final String error;
 
   HomeState({
+    @required this.randomB,
+    @required this.randomA,
     @required this.execEnd,
     @required this.execStep,
     @required this.matFPGA,
@@ -35,6 +39,8 @@ class HomeState {
   });
 
   static HomeState get initialState => HomeState(
+        randomB: false,
+        randomA: false,
         execEnd: false,
         execStep: '',
         matFPGA: null,
@@ -52,6 +58,8 @@ class HomeState {
       );
 
   HomeState clone({
+    bool randomB,
+    bool randomA,
     bool execEnd,
     String execStep,
     Map<int, int> matFPGA,
@@ -68,6 +76,8 @@ class HomeState {
     String error,
   }) {
     return HomeState(
+      randomB: randomB ?? this.randomB,
+      randomA: randomA ?? this.randomA,
       execEnd: execEnd ?? this.execEnd,
       execStep: execStep ?? this.execStep,
       matFPGA: matFPGA ?? this.matFPGA,

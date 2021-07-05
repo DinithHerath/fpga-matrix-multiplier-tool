@@ -40,6 +40,10 @@ class CalculateEvent extends HomeEvent {}
 
 class ClearEvent extends HomeEvent {}
 
+class RandomizeMatrixAEvent extends HomeEvent {}
+
+class RandomizeMatrixBEvent extends HomeEvent {}
+
 class FinalOutputEvent extends HomeEvent {
   final Map<int, int> out;
 
