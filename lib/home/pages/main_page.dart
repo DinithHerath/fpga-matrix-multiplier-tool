@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fpga_matrix_multiplier/constants.dart';
 import 'package:fpga_matrix_multiplier/home/bloc/home_event.dart';
 import 'package:fpga_matrix_multiplier/home/components/matrix_fill.dart';
+import 'package:fpga_matrix_multiplier/settings/settings_page.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../bloc/home_bloc.dart';
@@ -32,6 +33,17 @@ class MainPage extends StatelessWidget {
             padding: EdgeInsets.symmetric(vertical: 10, horizontal: 20),
             child: Column(
               children: [
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: IconButton(
+                    icon: Icon(Icons.settings),
+                    onPressed: () {
+                      Navigator.push(context, MaterialPageRoute(builder: (context) => SettingsPage()));
+                    },
+                    iconSize: 32,
+                    color: Constants.kHomeCard,
+                  ),
+                ),
                 SizedBox(height: 20),
                 Center(
                   child: Text(
