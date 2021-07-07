@@ -1,6 +1,6 @@
 # FPGA Matrix Multiplier Tool
 
-Support application for matrix multiplication using fpga
+Support application for matrix multiplication using fpga written in Flutter.
 
 ## Getting Started
 
