@@ -138,6 +138,11 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
         final exec = (event as UpdateExecEvent).exec;
         yield state.clone(execStep: exec);
         break;
+
+      case UpdateTimeCommandEvent:
+        final cmd = (event as UpdateTimeCommandEvent).cmd;
+        yield state.clone(timeCmd: cmd);
+        break;
     }
   }
 
@@ -193,7 +198,7 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
       await file.writeAsString('$mem\n', mode: FileMode.append);
     }
     final read = tb.readAsLinesSync();
-    read[5] = '\t' + 'reg [2:0] core_sel = 3\'d4;';
+    read[6] = '\t' + 'reg [2:0] core_sel = 3\'d${settingsBloc.state.cores.toString()};';
     await tb.writeAsString('');
     for (var tbs in read) {
       await tb.writeAsString('$tbs\n', mode: FileMode.append);
@@ -220,7 +225,7 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
     orderedList.addAll([state.rowsA]);
     orderedList.addAll([state.columnsA]);
     orderedList.addAll([state.columnsB]);
-    orderedList.addAll([4, 0, 0, 0, 0, 10, 70]);
+    orderedList.addAll([settingsBloc.state.cores, 0, 0, 0, 0, 10, 70]);
     orderedList.addAll(state.matA.values.toList());
     for (var i = 0; i < state.columnsB; i++) {
       for (var j = 0; j < state.rowsB; j++) {
@@ -260,12 +265,15 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
     var shell = Shell(stdout: controller.sink, verbose: false, workingDirectory: '${cd}simulation\\modelsim');
     controller.stream.listen((event) {
       add(UpdateExecEvent('\$ $event'));
-      print(event);
+      if (event.contains('Time')) {
+        add(UpdateTimeCommandEvent(event));
+        print(event);
+      }
     });
     try {
       await shell.run('''
         # VSIM exec function
-        vsim -do "do ${settingsBloc.state.doName}; do {wave_files/waves.do}; radix -decimal; restart -force; run -all; mem display -addressradix d -dataradix unsigned -wordsperline 10 /processor_tb/dut/data_mem1; mem save -outfile {output_files/res.txt} -dataradix unsigned -noaddress -start $start -end $end /processor_tb/dut/data_mem1 -wordsperline 1"
+        vsim -do "do ${settingsBloc.state.doName}; do {wave_files/waves.do}; radix -decimal; restart -force; run -all; mem display -addressradix d -dataradix unsigned -wordsperline 10 /processor_tb/dut/data_mem1; mem save -outfile {output_files/res.txt} -dataradix unsigned -noaddress -start $start -end $end /processor_tb/dut/data_mem1 -wordsperline 1; exit -force"
         exit()
 ''');
     } on ShellException catch (_) {
