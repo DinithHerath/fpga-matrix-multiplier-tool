@@ -12,10 +12,10 @@ class ResultPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // ignore: close_sinks
+    final homeBloc = BlocProvider.of<HomeBloc>(context);
     return BlocBuilder<HomeBloc, HomeState>(
       builder: (context, state) {
-        // ignore: close_sinks
-        final homeBloc = BlocProvider.of<HomeBloc>(context);
         return Scaffold(
           backgroundColor: Colors.white,
           floatingActionButton: FloatingActionButton(
@@ -58,17 +58,45 @@ class ResultPage extends StatelessWidget {
                 ),
                 SizedBox(height: 30),
                 Expanded(
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  child: ListView(
                     children: [
-                      MatrixResWidget(isComp: true),
-                      Container(
-                        height: MediaQuery.of(context).size.height * 0.3,
-                        width: 1.0,
-                        color: Constants.kDivider,
-                        margin: const EdgeInsets.only(left: 10.0, right: 10.0),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: [
+                          MatrixResWidget(isComp: true),
+                          Container(
+                            height: MediaQuery.of(context).size.height * 0.3,
+                            width: 1.0,
+                            color: Constants.kDivider,
+                            margin: const EdgeInsets.only(left: 10.0, right: 10.0),
+                          ),
+                          MatrixResWidget(isComp: false),
+                        ],
                       ),
-                      MatrixResWidget(isComp: false),
+                      if (state.execEnd)
+                        UnconstrainedBox(
+                          child: Padding(
+                            padding: const EdgeInsets.only(top: 16),
+                            child: Material(
+                              borderRadius: BorderRadius.circular(8),
+                              color: Constants.kHomeCard.withAlpha(52),
+                              clipBehavior: Clip.antiAlias,
+                              child: Padding(
+                                padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 16),
+                                child: Text(
+                                  'Time Elapsed:  ${state.timeCmd.substring(1).trim().split(" ").sublist(1,3).join(" ")}',
+                                  style: GoogleFonts.montserrat(
+                                    textStyle: TextStyle(
+                                      fontSize: 28,
+                                      color: Constants.kHomeCard,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        )
                     ],
                   ),
                 ),
