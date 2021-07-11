@@ -27,6 +27,11 @@ class SettingsBloc extends Bloc<SettingsEvent, SettingsState> {
         final cur = state.isMulti;
         yield state.clone(isMulti: !cur);
         break;
+
+      case UpdateCoreCountEvent:
+        final count = (event as UpdateCoreCountEvent).count;
+        yield state.clone(cores: count);
+        break;
     }
   }
 

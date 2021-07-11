@@ -16,3 +16,9 @@ class UpdateDoFileEvent extends SettingsEvent {
 }
 
 class ToggleCoresEvent extends SettingsEvent {}
+
+class UpdateCoreCountEvent extends SettingsEvent {
+  final int count;
+
+  UpdateCoreCountEvent(this.count);
+}
