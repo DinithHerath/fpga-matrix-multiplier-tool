@@ -63,3 +63,9 @@ class SavedAllEvent extends HomeEvent {
 
   SavedAllEvent(this.saved);
 }
+
+class UpdateTimeCommandEvent extends HomeEvent {
+  final String cmd;
+
+  UpdateTimeCommandEvent(this.cmd);
+}

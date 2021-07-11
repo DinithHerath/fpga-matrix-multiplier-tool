@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 @immutable
 class HomeState {
+  final String timeCmd;
   final bool randomB;
   final bool randomA;
   final bool execEnd;
@@ -20,6 +21,7 @@ class HomeState {
   final String error;
 
   HomeState({
+    @required this.timeCmd,
     @required this.randomB,
     @required this.randomA,
     @required this.execEnd,
@@ -39,6 +41,7 @@ class HomeState {
   });
 
   static HomeState get initialState => HomeState(
+        timeCmd: '',
         randomB: false,
         randomA: false,
         execEnd: false,
@@ -58,6 +61,7 @@ class HomeState {
       );
 
   HomeState clone({
+    String timeCmd,
     bool randomB,
     bool randomA,
     bool execEnd,
@@ -76,6 +80,7 @@ class HomeState {
     String error,
   }) {
     return HomeState(
+      timeCmd: timeCmd ?? this.timeCmd,
       randomB: randomB ?? this.randomB,
       randomA: randomA ?? this.randomA,
       execEnd: execEnd ?? this.execEnd,
