@@ -186,10 +186,17 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
     final cd = directory.trim().split("Release\\fpga_matrix_multiplier.exe")[0];
     final File file = File('${cd}simulation\\modelsim\\initial_files\\data_mem.txt');
     final File fileOut = File('${cd}simulation\\modelsim\\output_files\\res.txt');
+    final File tb = File('${cd}testbenches\\processor_tb.v');
     await fileOut.writeAsString('');
     await file.writeAsString('');
     for (var mem in output) {
       await file.writeAsString('$mem\n', mode: FileMode.append);
+    }
+    final read = tb.readAsLinesSync();
+    read[5] = '\t' + 'reg [2:0] core_sel = 3\'d4;';
+    await tb.writeAsString('');
+    for (var tbs in read) {
+      await tb.writeAsString('$tbs\n', mode: FileMode.append);
     }
   }
 
