@@ -129,6 +129,10 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
         yield state.clone(matA: Map(), matB: Map(), isDimAdded: false, isSaved: false, index: 0, execStep: '', execEnd: false);
         break;
 
+      case SaveEvent:
+        yield state.clone(index: 0, execStep: '', execEnd: false);
+        break;
+
       case SavedAllEvent:
         final save = (event as SavedAllEvent).saved;
         yield state.clone(isSaved: save);

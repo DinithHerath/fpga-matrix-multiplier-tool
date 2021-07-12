@@ -18,13 +18,27 @@ class ResultPage extends StatelessWidget {
       builder: (context, state) {
         return Scaffold(
           backgroundColor: Colors.white,
-          floatingActionButton: FloatingActionButton(
-            child: Icon(Icons.refresh, color: Colors.white, size: 26),
-            tooltip: 'Restart Calculation',
-            backgroundColor: Constants.kHomeCard,
-            onPressed: () {
-              homeBloc.add(RestartEvent());
-            },
+          floatingActionButton: Column(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              FloatingActionButton(
+                child: Icon(Icons.refresh, color: Colors.white, size: 26),
+                tooltip: 'Restart Calculation',
+                backgroundColor: Constants.kHomeCard,
+                onPressed: () {
+                  homeBloc.add(RestartEvent());
+                },
+              ),
+              SizedBox(height: 10),
+              FloatingActionButton(
+                child: Icon(Icons.beenhere_rounded, color: Colors.white, size: 26),
+                tooltip: 'Save Matrix',
+                backgroundColor: Constants.kHomeCard,
+                onPressed: () {
+                  homeBloc.add(SaveEvent());
+                },
+              ),
+            ],
           ),
           body: Padding(
             padding: EdgeInsets.symmetric(vertical: 10, horizontal: 20),
@@ -84,7 +98,7 @@ class ResultPage extends StatelessWidget {
                               child: Padding(
                                 padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 16),
                                 child: Text(
-                                  'Time Elapsed:  ${state.timeCmd.substring(1).trim().split(" ").sublist(1,3).join(" ")}',
+                                  'Time Elapsed:  ${state.timeCmd.substring(1).trim().split(" ").sublist(1, 3).join(" ")}',
                                   style: GoogleFonts.montserrat(
                                     textStyle: TextStyle(
                                       fontSize: 28,

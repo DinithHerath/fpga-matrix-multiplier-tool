@@ -58,6 +58,8 @@ class UpdateExecEvent extends HomeEvent {
 
 class RestartEvent extends HomeEvent {}
 
+class SaveEvent extends HomeEvent {}
+
 class SavedAllEvent extends HomeEvent {
   final bool saved;
 
