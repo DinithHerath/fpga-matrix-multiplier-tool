@@ -1,6 +1,6 @@
 # FPGA Matrix Multiplier Tool
 
-Support windows application for matrix multiplication using fpga written in flutter.
+Support windows application for matrix multiplication using modelsim simulator written in flutter.
 ## Getting Started
 
 This project is a starting point for a Flutter application.
